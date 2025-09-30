@@ -1,15 +1,28 @@
 'use strict';
 
-function notify(message, type) {
-  const div = document.createElement('div');
+let removeTimerId;
 
-  div.dataset.qa = 'notification';
+function notify(message, type) {
+  let div = document.querySelector('div[data-qa="notification"]');
+
+  if (!div) {
+    div = document.createElement('div');
+    div.dataset.qa = 'notification';
+    document.body.appendChild(div);
+  }
+
   div.className = type;
   div.textContent = message;
 
-  document.body.appendChild(div);
+  // якщо вже є активний таймер — прибираємо його
+  if (removeTimerId) {
+    clearTimeout(removeTimerId);
+  }
 
-  setTimeout(() => div.remove(), 4000);
+  removeTimerId = setTimeout(() => {
+    div.remove();
+    removeTimerId = null;
+  }, 4000);
 }
 
 // 1
