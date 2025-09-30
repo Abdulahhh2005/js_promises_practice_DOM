@@ -17,15 +17,17 @@ const firstPromise = new Promise((resolve, reject) => {
   // eslint-disable-next-line no-shadow
   const clickHandler = (event) => {
     if (event.button === 0) {
-      resolve('First promise was resolved on a left click in the document');
+      resolve('First promise was resolved');
       document.removeEventListener('mousedown', clickHandler);
+      clearTimeout(timeoutId);
     }
   };
 
   document.addEventListener('mousedown', clickHandler);
 
-  setTimeout(() => {
-    reject(new Error('First promise was rejected in 3 seconds if not clicked'));
+  const timeoutId = setTimeout(() => {
+    reject(new Error('First promise was rejected'));
+    document.removeEventListener('mousedown', clickHandler);
   }, 3000);
 });
 
@@ -38,6 +40,9 @@ const secondPromise = new Promise((resolve) => {
   // eslint-disable-next-line no-shadow
   const clickHandler = (event) => {
     if (event.button === 0 || event.button === 2) {
+      if (event.button === 2) {
+        event.preventDefault();
+      } // блокуємо контекстне меню
       resolve('Second promise was resolved');
       document.removeEventListener('mousedown', clickHandler);
     }
@@ -46,7 +51,9 @@ const secondPromise = new Promise((resolve) => {
   document.addEventListener('mousedown', clickHandler);
 });
 
-secondPromise.then((message) => notify(message, 'success'));
+secondPromise
+  .then((message) => notify(message, 'success'))
+  .catch((error) => notify(error.message, 'error'));
 
 // 3
 const thirdPromise = new Promise((resolve) => {
@@ -60,15 +67,12 @@ const thirdPromise = new Promise((resolve) => {
     }
 
     if (event.button === 2) {
+      event.preventDefault(); // блокуємо контекстне меню
       rightClicked = true;
     }
 
     if (leftClicked && rightClicked) {
-      resolve(
-        // eslint-disable-next-line max-len
-        'Third promise was resolved only after both left and right clicks happened',
-      );
-
+      resolve('Third promise was resolved');
       document.removeEventListener('mousedown', clickHandler);
     }
   };
@@ -76,4 +80,6 @@ const thirdPromise = new Promise((resolve) => {
   document.addEventListener('mousedown', clickHandler);
 });
 
-thirdPromise.then((message) => notify(message, 'success'));
+thirdPromise
+  .then((message) => notify(message, 'success'))
+  .catch((error) => notify(error.message, 'error'));
